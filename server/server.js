@@ -12,11 +12,25 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB Connect
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected ✅"))
-  .catch((err) => console.log("MongoDB Error ❌", err));
+// MongoDB Connection (Vercel serverless ke liye cached connection)
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) return;
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    isConnected = true;
+    console.log("MongoDB Connected ✅");
+  } catch (err) {
+    console.log("MongoDB Error ❌", err);
+  }
+};
+
+// Har request se pehle DB connect karo
+app.use(async (req, res, next) => {
+  await connectDB();
+  next();
+});
 
 // Routes
 app.use("/api/menu", menuRoutes);
