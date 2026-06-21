@@ -57,7 +57,7 @@ function App() {
     <div className="min-h-screen bg-gray-100">
       <header className="bg-gradient-to-r from-black via-gray-900 to-black p-5 shadow-lg print:hidden border-b-4 border-yellow-400">
         <h1 className="text-3xl md:text-4xl font-extrabold text-center text-yellow-400 tracking-wide drop-shadow-lg">
-          🍔 LAHORI LASON
+          🍔 LAHORI LASON FAST FOOD
         </h1>
         <p className="text-center text-gray-300 text-xs md:text-sm mt-1">
           Taste & Quality | Gujranwala
