@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
@@ -7,6 +7,36 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
 
   const API_URL = import.meta.env.VITE_API_URL;
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  // Ctrl+P dabane pe automatically order save ho
+  useEffect(() => {
+    const handleBeforePrint = async () => {
+      if (cart.length > 0) {
+        const orderData = {
+          customerName: 'Walk-in Customer',
+          items: cart.map((item) => ({
+            menuItem: item.id,
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+          })),
+          totalAmount: total,
+          status: 'delivered',
+        };
+
+        try {
+          const res = await axios.post(`${API_URL}/api/orders`, orderData);
+          setLastOrder(res.data);
+          clearCart();
+        } catch (error) {
+          console.log('Auto-save error:', error);
+        }
+      }
+    };
+
+    window.addEventListener('beforeprint', handleBeforePrint);
+    return () => window.removeEventListener('beforeprint', handleBeforePrint);
+  }, [cart, total]);
 
   const handlePrint = async () => {
     if (cart.length === 0) {
@@ -32,7 +62,6 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
       setLastOrder(res.data);
       clearCart();
 
-      // Thoda wait karo taake receipt render ho jaye, phir print karo
       setTimeout(() => {
         window.print();
       }, 200);
@@ -86,7 +115,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
         <div className="receipt-print p-4">
           <h2 className="text-center text-xl font-bold">Lahori Lason</h2>
           <p className="text-center text-sm">G.T Road Near Rahwali Cantt Gujranwala</p>
-          <p className="text-center text-sm mb-4">0300-6199556</p>
+          <p className="text-center text-sm mb-4">0345-6199593</p>
 
           <p>Date: {new Date(lastOrder.createdAt).toLocaleString()}</p>
 
