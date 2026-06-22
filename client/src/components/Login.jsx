@@ -18,7 +18,7 @@ function Login({ onLogin }) {
         onLogin();
       }
     } catch (err) {
-      setError('Galat Password! Dobara try karo.');
+      setError('Wrong Password! try again...');
       setPassword('');
     } finally {
       setLoading(false);
