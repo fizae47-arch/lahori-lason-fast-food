@@ -4,8 +4,10 @@ import axios from 'axios';
 function OrdersList() {
   const [orders, setOrders] = useState([]);
 
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const fetchOrders = () => {
-    axios.get(`${import.meta.env.VITE_API_URL}/api/orders`)
+    axios.get(`${API_URL}/api/orders`)
       .then((res) => setOrders(res.data))
       .catch((err) => console.log(err));
   };
@@ -17,11 +19,20 @@ function OrdersList() {
   const handleDelete = async (id) => {
     if (window.confirm('Order delete karna hai?')) {
       try {
-        await axios.delete(`${import.meta.env.VITE_API_URL}/api/orders/${id}`);
+        await axios.delete(`${API_URL}/api/orders/${id}`);
         fetchOrders();
       } catch (error) {
         alert('Error: Order delete nahi hua!');
       }
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      await axios.put(`${API_URL}/api/orders/${id}`, { status: newStatus });
+      fetchOrders();
+    } catch (error) {
+      alert('Error: Status update nahi hua!');
     }
   };
 
@@ -34,6 +45,19 @@ function OrdersList() {
     cancelled: 'bg-red-200 text-red-800',
   };
 
+  const today = new Date().toDateString();
+  const todaysOrders = orders.filter(
+    (order) => new Date(order.createdAt).toDateString() === today
+  );
+
+  const todaysEarning = todaysOrders
+    .filter((order) => order.status === 'delivered')
+    .reduce((sum, order) => sum + order.totalAmount, 0);
+
+  const totalEarning = orders
+    .filter((order) => order.status === 'delivered')
+    .reduce((sum, order) => sum + order.totalAmount, 0);
+
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
@@ -41,6 +65,19 @@ function OrdersList() {
         <button onClick={fetchOrders} className="bg-gray-700 text-white px-4 py-1 rounded">
           🔄 Refresh
         </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+        <div className="bg-green-600 text-white p-4 rounded-lg shadow">
+          <p className="text-sm opacity-80">Today Earnings ({new Date().toLocaleDateString()})</p>
+          <p className="text-2xl font-bold">Rs. {todaysEarning}</p>
+          <p className="text-xs opacity-70">{todaysOrders.length} orders today</p>
+        </div>
+        <div className="bg-blue-600 text-white p-4 rounded-lg shadow">
+          <p className="text-sm opacity-80">Total Earning (All Time)</p>
+          <p className="text-2xl font-bold">Rs. {totalEarning}</p>
+          <p className="text-xs opacity-70">{orders.length} total orders</p>
+        </div>
       </div>
 
       {orders.length === 0 ? (
@@ -57,9 +94,18 @@ function OrdersList() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusColors[order.status]}`}>
-                    {order.status}
-                  </span>
+                  <select
+                    value={order.status}
+                    onChange={(e) => handleStatusChange(order._id, e.target.value)}
+                    className={`px-3 py-1 rounded-full text-sm font-semibold border-0 ${statusColors[order.status]}`}
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="ready">Ready</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
                   <button
                     onClick={() => handleDelete(order._id)}
                     className="bg-red-500 text-white px-2 py-1 rounded text-sm"

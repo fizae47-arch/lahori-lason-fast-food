@@ -1,4 +1,5 @@
-import ChangePassword from './components/ChangePassword';
+import Deals from './components/Deals';
+import DealManagement from './components/DealManagement';
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import MenuList from './components/MenuList';
@@ -6,18 +7,19 @@ import Cart from './components/Cart';
 import OrdersList from './components/OrdersList';
 import MenuManagement from './components/MenuManagement';
 import CategoryManagement from './components/CategoryManagement';
+import ChangePassword from './components/ChangePassword';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [cart, setCart] = useState([]);
+  const [activeTab, setActiveTab] = useState('pos');
 
   useEffect(() => {
-    const loggedIn = localStorage.getItem('isLoggedIn');
+    const loggedIn = sessionStorage.getItem('isLoggedIn');
     if (loggedIn === 'true') {
       setIsLoggedIn(true);
     }
   }, []);
-  const [cart, setCart] = useState([]);
-  const [activeTab, setActiveTab] = useState('pos'); // 'pos', 'orders', 'menu', 'categories'
 
   const addToCart = (item, price) => {
     const existingItem = cart.find(
@@ -63,13 +65,19 @@ function App() {
     setCart([]);
   };
 
+  const handleLogout = () => {
+    sessionStorage.removeItem('isLoggedIn');
+    setIsLoggedIn(false);
+  };
+
   if (!isLoggedIn) {
     return <Login onLogin={() => setIsLoggedIn(true)} />;
   }
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-gradient-to-r from-black via-gray-900 to-black p-5 shadow-lg print:hidden border-b-4 border-yellow-400">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center text-yellow-400 tracking-wide drop-shadow-lg">
+        <h1 className="text-2xl md:text-4xl font-extrabold text-center text-yellow-400 tracking-wide drop-shadow-lg">
           🍔 LAHORI LASON FAST FOOD
         </h1>
         <p className="text-center text-gray-300 text-xs md:text-sm mt-1">
@@ -108,6 +116,16 @@ function App() {
             🍔 Menu
           </button>
           <button
+            onClick={() => setActiveTab('deals')}
+            className={`px-6 py-2 rounded-full font-bold transition-all ${
+              activeTab === 'deals'
+                ? 'bg-yellow-400 text-black shadow-lg scale-105'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            🎯 Deals
+          </button>
+          <button
             onClick={() => setActiveTab('categories')}
             className={`px-6 py-2 rounded-full font-bold transition-all ${
               activeTab === 'categories'
@@ -118,6 +136,16 @@ function App() {
             📁 Categories
           </button>
           <button
+            onClick={() => setActiveTab('dealmanagement')}
+            className={`px-6 py-2 rounded-full font-bold transition-all ${
+              activeTab === 'dealmanagement'
+                ? 'bg-yellow-400 text-black shadow-lg scale-105'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            🎯 Manage Deals
+          </button>
+          <button
             onClick={() => setActiveTab('settings')}
             className={`px-6 py-2 rounded-full font-bold transition-all ${
               activeTab === 'settings'
@@ -126,6 +154,12 @@ function App() {
             }`}
           >
             🔐 Settings
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 rounded-full font-bold bg-red-600 text-white hover:bg-red-700 transition-all"
+          >
+            🚪 Logout
           </button>
         </div>
       </header>
@@ -146,6 +180,25 @@ function App() {
           </div>
         </div>
       )}
+
+      {activeTab === 'deals' && (
+        <div className="flex flex-col md:flex-row">
+          <div className="md:w-2/3">
+            <Deals addToCart={addToCart} />
+          </div>
+          <div className="md:w-1/3">
+            <Cart
+              cart={cart}
+              increaseQty={increaseQty}
+              decreaseQty={decreaseQty}
+              removeItem={removeItem}
+              clearCart={clearCart}
+            />
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'dealmanagement' && <DealManagement />}
 
       {activeTab === 'orders' && <OrdersList />}
 

@@ -1,4 +1,3 @@
-const authRoutes = require("./routes/authRoutes");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -6,6 +5,8 @@ require("dotenv").config();
 
 const menuRoutes = require("./routes/menuRoutes");
 const orderRoutes = require("./routes/orderRoutes");
+const authRoutes = require("./routes/authRoutes");
+const dealRoutes = require("./routes/dealRoutes");
 
 const app = express();
 
@@ -34,13 +35,14 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
-app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/deals", dealRoutes);
 
 // Test Route
 app.get("/", (req, res) => {
-  res.send("Lahori Lason Server is Running! 🍔");
+  res.send("Lahori Lason Server is Running! 🍱");
 });
 
 // Local development ke liye hi server start hoga
