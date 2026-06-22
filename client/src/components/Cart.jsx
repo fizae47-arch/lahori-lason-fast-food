@@ -106,9 +106,9 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
 
       {lastOrder && (
         <div className="receipt-print p-4">
-          <h2 className="text-center text-xl font-bold">Lahori Lason</h2>
+          <h2 className="text-center text-xl font-bold">Lahori Lason Fast Food</h2>
           <p className="text-center text-sm">G.T Road Near Rahwali Cantt Gujranwala</p>
-          <p className="text-center text-sm mb-4">0300-6199556</p>
+          <p className="text-center text-sm mb-4">0345-6199593</p>
 
           <p>Name: {lastOrder.customerName}</p>
           <p>Date: {new Date(lastOrder.createdAt).toLocaleDateString()}</p>

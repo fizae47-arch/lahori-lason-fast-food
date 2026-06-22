@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import ChangePassword from './components/ChangePassword';
+import { useState, useEffect } from 'react';
+import Login from './components/Login';
 import MenuList from './components/MenuList';
 import Cart from './components/Cart';
 import OrdersList from './components/OrdersList';
@@ -6,6 +8,14 @@ import MenuManagement from './components/MenuManagement';
 import CategoryManagement from './components/CategoryManagement';
 
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const loggedIn = localStorage.getItem('isLoggedIn');
+    if (loggedIn === 'true') {
+      setIsLoggedIn(true);
+    }
+  }, []);
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('pos'); // 'pos', 'orders', 'menu', 'categories'
 
@@ -53,6 +63,9 @@ function App() {
     setCart([]);
   };
 
+  if (!isLoggedIn) {
+    return <Login onLogin={() => setIsLoggedIn(true)} />;
+  }
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-gradient-to-r from-black via-gray-900 to-black p-5 shadow-lg print:hidden border-b-4 border-yellow-400">
@@ -104,6 +117,16 @@ function App() {
           >
             📁 Categories
           </button>
+          <button
+            onClick={() => setActiveTab('settings')}
+            className={`px-6 py-2 rounded-full font-bold transition-all ${
+              activeTab === 'settings'
+                ? 'bg-yellow-400 text-black shadow-lg scale-105'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            🔐 Settings
+          </button>
         </div>
       </header>
 
@@ -129,6 +152,8 @@ function App() {
       {activeTab === 'menu' && <MenuManagement />}
 
       {activeTab === 'categories' && <CategoryManagement />}
+
+      {activeTab === 'settings' && <ChangePassword />}
     </div>
   );
 }
