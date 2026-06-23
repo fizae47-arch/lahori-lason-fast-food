@@ -66,7 +66,7 @@ function MenuList({ addToCart }) {
   }, [searchTerm]);
 
   return (
-    <div className="p-4">
+    <div className="p-4 print:hidden">
       <h2 className="text-2xl font-bold mb-4">Menu Items</h2>
 
       <input

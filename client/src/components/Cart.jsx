@@ -1,49 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
   const [loading, setLoading] = useState(false);
   const [lastOrder, setLastOrder] = useState(null);
+  const isSavingRef = useRef(false);
 
   const API_URL = import.meta.env.VITE_API_URL;
   const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Ctrl+P dabane pe automatically order save ho
-  useEffect(() => {
-    const handleBeforePrint = async () => {
-      if (cart.length > 0) {
-        const orderData = {
-          customerName: 'Walk-in Customer',
-          items: cart.map((item) => ({
-            menuItem: item.id,
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-          })),
-          totalAmount: total,
-          status: 'delivered',
-        };
+  const saveOrder = async () => {
+    if (cart.length === 0 || isSavingRef.current) return null;
 
-        try {
-          const res = await axios.post(`${API_URL}/api/orders`, orderData);
-          setLastOrder(res.data);
-          clearCart();
-        } catch (error) {
-          console.log('Auto-save error:', error);
-        }
-      }
-    };
-
-    window.addEventListener('beforeprint', handleBeforePrint);
-    return () => window.removeEventListener('beforeprint', handleBeforePrint);
-  }, [cart, total]);
-
-  const handlePrint = async () => {
-    if (cart.length === 0) {
-      alert('Cart khali hai!');
-      return;
-    }
-
+    isSavingRef.current = true;
     const orderData = {
       customerName: 'Walk-in Customer',
       items: cart.map((item) => ({
@@ -57,20 +26,50 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
     };
 
     try {
-      setLoading(true);
       const res = await axios.post(`${API_URL}/api/orders`, orderData);
       setLastOrder(res.data);
       clearCart();
-
-      setTimeout(() => {
-        window.print();
-      }, 200);
+      isSavingRef.current = false;
+      return res.data;
     } catch (error) {
-      alert('Error: Order save nahi hua!');
-      console.log(error);
-    } finally {
-      setLoading(false);
+      console.log('Save error:', error);
+      isSavingRef.current = false;
+      return null;
     }
+  };
+
+  // Ctrl+P (keydown) khud catch karo — beforeprint ka wait na karna pade
+  useEffect(() => {
+    const handleKeyDown = async (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+        e.preventDefault();
+        if (cart.length > 0) {
+          await saveOrder();
+          setTimeout(() => {
+            window.print();
+          }, 150);
+        } else if (lastOrder) {
+          window.print();
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [cart, total, lastOrder]);
+
+  const handlePrint = async () => {
+    if (cart.length === 0) {
+      alert('Cart khali hai!');
+      return;
+    }
+
+    setLoading(true);
+    await saveOrder();
+    setTimeout(() => {
+      window.print();
+    }, 150);
+    setLoading(false);
   };
 
   return (
@@ -106,7 +105,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
             disabled={loading || cart.length === 0}
             className="w-full bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700 disabled:bg-gray-400"
           >
-            {loading ? 'Saving & Printing...' : '🖨️ Print & Save Order'}
+            {loading ? 'Saving & Printing...' : '🖨️ Print & Save Order (Ctrl+P)'}
           </button>
         </div>
       </div>
