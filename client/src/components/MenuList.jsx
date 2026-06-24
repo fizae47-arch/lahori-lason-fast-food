@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 
 function MenuList({ addToCart, resetSearchTrigger }) {
   const [items, setItems] = useState([]);
   const [deals, setDeals] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [searchedItems, setSearchedItems] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const itemRefs = useRef([]);
 
@@ -20,17 +21,25 @@ function MenuList({ addToCart, resetSearchTrigger }) {
       .catch((err) => console.log(err));
   }, []);
 
-  // Menu items aur deals dono ek hi list mein combine karo, har ek ko "type" se mark karo
+  const sortedItems = [...items];
+
   const combinedList = [
-    ...items.map((item) => ({ ...item, _type: 'menu' })),
+    ...sortedItems.map((item) => ({ ...item, _type: 'menu' })),
     ...deals.map((deal) => ({ ...deal, _type: 'deal' })),
   ];
 
-  const filteredItems = combinedList.filter((item) =>
-    item.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredItems =
+    searchTerm.trim() !== ''
+      ? combinedList.filter((item) =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
+      : searchedItems.length > 0
+        ? searchedItems
+        : combinedList;
 
-  const handleAdd = (item) => {
+  // ✅ useCallback se stable reference - stale closure problem fix
+  const handleAdd = useCallback((item) => {
+    if (!item) return;
     if (item._type === 'deal') {
       addToCart({ _id: item._id, name: item.name }, item.price);
     } else if (item.price) {
@@ -38,39 +47,52 @@ function MenuList({ addToCart, resetSearchTrigger }) {
     } else if (item.sizes) {
       addToCart(item, item.sizes.small);
     }
-  };
+  }, [addToCart]);
 
-  // Keyboard navigation
+  // ✅ filteredItems ko ref mein rakho taake useEffect mein hamesha latest mile
+  const filteredItemsRef = useRef(filteredItems);
+  useEffect(() => {
+    filteredItemsRef.current = filteredItems;
+  });
+
+  const selectedIndexRef = useRef(selectedIndex);
+  useEffect(() => {
+    selectedIndexRef.current = selectedIndex;
+  });
+
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (filteredItems.length === 0) return;
+      const currentItems = filteredItemsRef.current;
+      const currentIndex = selectedIndexRef.current;
+
+      if (currentItems.length === 0) return;
 
       const columns = window.innerWidth >= 768 ? 3 : window.innerWidth >= 640 ? 2 : 1;
 
       if (e.key === 'ArrowRight') {
         e.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + 1, filteredItems.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, currentItems.length - 1));
       } else if (e.key === 'ArrowLeft') {
         e.preventDefault();
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
       } else if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setSelectedIndex((prev) => Math.min(prev + columns, filteredItems.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + columns, currentItems.length - 1));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         setSelectedIndex((prev) => Math.max(prev - columns, 0));
       } else if (e.key === 'Enter') {
         e.preventDefault();
-        const item = filteredItems[selectedIndex];
+        const item = currentItems[currentIndex]; // ✅ ref se latest item lo
         if (item) handleAdd(item);
         setSearchTerm('');
-        selectedIndex(0);
+        // ✅ selectedIndex reset nahi - same item dobara Enter se add hoga
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [filteredItems, selectedIndex]);
+  }, [handleAdd]); // ✅ Sirf handleAdd dependency, baki sab ref se
 
   useEffect(() => {
     if (itemRefs.current[selectedIndex]) {
@@ -82,9 +104,21 @@ function MenuList({ addToCart, resetSearchTrigger }) {
     setSelectedIndex(0);
   }, [searchTerm]);
 
-  // Order save hone pe search clear karo
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    if (value.trim() !== '') {
+      const filtered = combinedList.filter((item) =>
+        item.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSearchedItems(filtered);
+    }
+  };
+
   useEffect(() => {
     setSearchTerm('');
+    setSearchedItems([]);
   }, [resetSearchTrigger]);
 
   return (
@@ -95,13 +129,9 @@ function MenuList({ addToCart, resetSearchTrigger }) {
         type="text"
         placeholder="🔍 Search item or deal..."
         value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
+        onChange={handleSearchChange}
         className="w-full border-2 border-yellow-400 p-3 rounded-lg mb-4 focus:outline-none focus:border-red-500"
       />
-
-      {/* <p className="text-xs text-gray-500 mb-2">
-        💡 Arrow keys se navigate karo, Enter dabake add karo
-      </p> */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
         {filteredItems.length === 0 ? (

@@ -16,7 +16,7 @@ router.get('/categories', async (req, res) => {
 // Saare Menu Items Lao (category ke naam ke saath)
 router.get('/items', async (req, res) => {
   try {
-    const items = await MenuItem.find().populate('category', 'name');
+   const items = await MenuItem.find().populate('category', 'name').sort({ createdAt: 1 });
     res.json(items);
   } catch (error) {
     res.status(500).json({ message: error.message });
