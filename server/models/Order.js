@@ -1,10 +1,15 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
+  invoiceNumber: {
+    type: Number,
+    unique: true
+  },
   customerName: {
     type: String,
     required: true
   },
+  // ... baaki sab same rahega
   items: [
     {
       menuItem: {

@@ -5,7 +5,14 @@ const Order = require('../models/Order');
 // Naya Order Banao
 router.post('/', async (req, res) => {
   try {
-    const newOrder = new Order(req.body);
+    // Sab se latest order dhundo, uska invoiceNumber lekar +1 karo
+    const lastOrder = await Order.findOne().sort({ invoiceNumber: -1 });
+    const nextInvoiceNumber = lastOrder?.invoiceNumber ? lastOrder.invoiceNumber + 1 : 1;
+
+    const newOrder = new Order({
+      ...req.body,
+      invoiceNumber: nextInvoiceNumber,
+    });
     await newOrder.save();
     res.status(201).json(newOrder);
   } catch (error) {

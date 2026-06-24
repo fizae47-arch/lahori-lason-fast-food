@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 
-function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
+function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSaved }) {
   const [loading, setLoading] = useState(false);
   const [lastOrder, setLastOrder] = useState(null);
   const isSavingRef = useRef(false);
@@ -27,8 +27,10 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
 
     try {
       const res = await axios.post(`${API_URL}/api/orders`, orderData);
+     console.log("Order Response:", res.data);
       setLastOrder(res.data);
       clearCart();
+      if (onOrderSaved) onOrderSaved();
       isSavingRef.current = false;
       return res.data;
     } catch (error) {
@@ -38,39 +40,48 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
     }
   };
 
-  // Ctrl+P (keydown) khud catch karo — beforeprint ka wait na karna pade
-  useEffect(() => {
-    const handleKeyDown = async (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
-        e.preventDefault();
-        if (cart.length > 0) {
-          await saveOrder();
-          setTimeout(() => {
-            window.print();
-          }, 150);
-        } else if (lastOrder) {
-          window.print();
-        }
+  // Ctrl+P khud catch karo
+useEffect(() => {
+  const handleKeyDown = async (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+      e.preventDefault();
+      if (cart.length > 0) {
+        await saveOrder();
+        setTimeout(() => window.print(), 150);
+      } else if (lastOrder) {
+        window.print();
       }
-    };
+    }
+  };
+  window.addEventListener('keydown', handleKeyDown);
+  return () => window.removeEventListener('keydown', handleKeyDown);
+}, [cart, lastOrder]);
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [cart, total, lastOrder]);
+const handleSaveOnly = async () => {
+  if (cart.length === 0) {
+    alert('Cart khali hai!');
+    return;
+  }
+  setLoading(true);
+  await saveOrder();
+  setLoading(false);
+};
 
   const handlePrint = async () => {
     if (cart.length === 0) {
       alert('Cart khali hai!');
       return;
     }
-
     setLoading(true);
     await saveOrder();
-    setTimeout(() => {
-      window.print();
-    }, 150);
+    setTimeout(() => window.print(), 150);
     setLoading(false);
   };
+
+  // Simple invoice number (timestamp ka last 4 digit)
+  const getInvoiceNumber = (order) => {
+  return order?.invoiceNumber || '----';
+};
 
   return (
     <div>
@@ -101,49 +112,64 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart }) {
           <p className="text-xl font-bold mb-3">Total: Rs. {total}</p>
 
           <button
-            onClick={handlePrint}
-            disabled={loading || cart.length === 0}
-            className="w-full bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700 disabled:bg-gray-400"
-          >
-            {loading ? 'Saving & Printing...' : '🖨️ Print & Save Order (Ctrl+P)'}
-          </button>
+  onClick={handleSaveOnly}
+  disabled={loading || cart.length === 0}
+  className="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700 disabled:bg-gray-400 mb-2"
+>
+  {loading ? 'Saving...' : '💾 Save Order Only'}
+</button>
+
+<button
+  onClick={handlePrint}
+  disabled={loading || cart.length === 0}
+  className="w-full bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700 disabled:bg-gray-400"
+>
+  {loading ? 'Saving & Printing...' : '🖨️ Print & Save Order (Ctrl+P)'}
+</button>
         </div>
       </div>
 
       {lastOrder && (
-        <div className="receipt-print p-4">
-          <h2 className="text-center text-xl font-bold">Lahori Lason</h2>
-          <p className="text-center text-sm">G.T Road Near Rahwali Cantt Gujranwala</p>
-          <p className="text-center text-sm mb-4">0345-6199593</p>
+  <div className="receipt-print p-2" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+    <div className="text-center font-bold" style={{ fontSize: '16px' }}>LAHORI LASON</div>
+    <div className="text-center font-bold" style={{ fontSize: '13px' }}>FAST FOOD</div>
+    <div className="text-center">G.T Road Near Rahwali Cantt</div>
+    <div className="text-center">0345-6199593</div>
 
-          <p>Date: {new Date(lastOrder.createdAt).toLocaleString()}</p>
+    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
 
-          <table className="w-full mt-4 border-t border-b">
-            <thead>
-              <tr>
-                <th className="text-left">Item</th>
-                <th className="text-right">Price</th>
-                <th className="text-right">Qty</th>
-                <th className="text-right">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {lastOrder.items.map((item, i) => (
-                <tr key={i}>
-                  <td>{item.name}</td>
-                  <td className="text-right">{item.price}</td>
-                  <td className="text-right">{item.quantity}</td>
-                  <td className="text-right">{item.price * item.quantity}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+    <div>Invoice #{getInvoiceNumber(lastOrder)}</div>
+    <div>Date: {new Date(lastOrder.createdAt).toLocaleDateString('en-GB')} {new Date(lastOrder.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
 
-          <p className="text-right font-bold mt-4">Total Bill: Rs. {lastOrder.totalAmount}</p>
+    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
 
-          <p className="text-center text-sm mt-6">Thank you for visiting Lahori Lason. Please visit again.</p>
-        </div>
-      )}
+    <div className="flex justify-between font-bold">
+      <span>Item</span>
+      <span>Qty&nbsp;&nbsp;&nbsp;Price</span>
+    </div>
+
+    <div style={{ borderTop: '1px solid black', margin: '6px 0' }}></div>
+
+    {lastOrder.items.map((item, i) => (
+      <div key={i} className="flex justify-between" style={{ marginBottom: '4px' }}>
+        <span>{item.name.length > 14 ? item.name.slice(0, 13) + '.' : item.name}</span>
+        <span>{item.quantity}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{item.price * item.quantity}</span>
+      </div>
+    ))}
+
+    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+
+    <div className="flex justify-between font-bold" style={{ fontSize: '15px' }}>
+      <span>TOTAL</span>
+      <span>Rs.{lastOrder.totalAmount}</span>
+    </div>
+
+    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+
+    <div className="text-center mt-2">Thank You For Visiting</div>
+    <div className="text-center">Please Visit Again</div>
+  </div>
+)}
     </div>
   );
 }

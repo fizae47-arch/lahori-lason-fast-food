@@ -1,5 +1,3 @@
-import Deals from './components/Deals';
-import DealManagement from './components/DealManagement';
 import { useState, useEffect } from 'react';
 import Login from './components/Login';
 import MenuList from './components/MenuList';
@@ -8,11 +6,13 @@ import OrdersList from './components/OrdersList';
 import MenuManagement from './components/MenuManagement';
 import CategoryManagement from './components/CategoryManagement';
 import ChangePassword from './components/ChangePassword';
+import DealManagement from './components/DealManagement';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [cart, setCart] = useState([]);
   const [activeTab, setActiveTab] = useState('pos');
+  const [orderSavedTrigger, setOrderSavedTrigger] = useState(0);
 
   useEffect(() => {
     const loggedIn = sessionStorage.getItem('isLoggedIn');
@@ -63,6 +63,10 @@ function App() {
 
   const clearCart = () => {
     setCart([]);
+  };
+
+  const triggerOrderSaved = () => {
+    setOrderSavedTrigger((prev) => prev + 1);
   };
 
   const handleLogout = () => {
@@ -116,14 +120,14 @@ function App() {
             🍔 Menu
           </button>
           <button
-            onClick={() => setActiveTab('deals')}
+            onClick={() => setActiveTab('dealmanagement')}
             className={`px-6 py-2 rounded-full font-bold transition-all ${
-              activeTab === 'deals'
+              activeTab === 'dealmanagement'
                 ? 'bg-yellow-400 text-black shadow-lg scale-105'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
-            🎯 Deals
+            🎯 Manage Deals
           </button>
           <button
             onClick={() => setActiveTab('categories')}
@@ -134,16 +138,6 @@ function App() {
             }`}
           >
             📁 Categories
-          </button>
-          <button
-            onClick={() => setActiveTab('dealmanagement')}
-            className={`px-6 py-2 rounded-full font-bold transition-all ${
-              activeTab === 'dealmanagement'
-                ? 'bg-yellow-400 text-black shadow-lg scale-105'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            🎯 Manage Deals
           </button>
           <button
             onClick={() => setActiveTab('settings')}
@@ -167,7 +161,7 @@ function App() {
       {activeTab === 'pos' && (
         <div className="flex flex-col md:flex-row">
           <div className="md:w-2/3">
-            <MenuList addToCart={addToCart} />
+            <MenuList addToCart={addToCart} resetSearchTrigger={orderSavedTrigger} />
           </div>
           <div className="md:w-1/3">
             <Cart
@@ -176,33 +170,17 @@ function App() {
               decreaseQty={decreaseQty}
               removeItem={removeItem}
               clearCart={clearCart}
+              onOrderSaved={triggerOrderSaved}
             />
           </div>
         </div>
       )}
-
-      {activeTab === 'deals' && (
-        <div className="flex flex-col md:flex-row">
-          <div className="md:w-2/3">
-            <Deals addToCart={addToCart} />
-          </div>
-          <div className="md:w-1/3">
-            <Cart
-              cart={cart}
-              increaseQty={increaseQty}
-              decreaseQty={decreaseQty}
-              removeItem={removeItem}
-              clearCart={clearCart}
-            />
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'dealmanagement' && <DealManagement />}
 
       {activeTab === 'orders' && <OrdersList />}
 
       {activeTab === 'menu' && <MenuManagement />}
+
+      {activeTab === 'dealmanagement' && <DealManagement />}
 
       {activeTab === 'categories' && <CategoryManagement />}
 
