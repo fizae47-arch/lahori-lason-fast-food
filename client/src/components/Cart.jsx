@@ -136,19 +136,19 @@ const handleSaveOnly = async () => {
     <div className="text-center">G.T Road Near Rahwali Cantt</div>
     <div className="text-center">0345-6199593</div>
 
-    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+   <div style={{ margin: '8px 0' }}></div>
 
     <div>Invoice #{getInvoiceNumber(lastOrder)}</div>
     <div>Date: {new Date(lastOrder.createdAt).toLocaleDateString('en-GB')} {new Date(lastOrder.createdAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</div>
 
-    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+    <div style={{ margin: '8px 0' }}></div>
 
     <div className="flex justify-between font-bold">
       <span>Item</span>
       <span>Qty&nbsp;&nbsp;&nbsp;Price</span>
     </div>
 
-    <div style={{ borderTop: '1px solid black', margin: '6px 0' }}></div>
+    <div style={{ margin: '8px 0' }}></div>
 
     {lastOrder.items.map((item, i) => (
       <div key={i} className="flex justify-between" style={{ marginBottom: '4px' }}>
@@ -157,14 +157,14 @@ const handleSaveOnly = async () => {
       </div>
     ))}
 
-    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+    <div style={{ margin: '8px 0' }}></div>
 
     <div className="flex justify-between font-bold" style={{ fontSize: '15px' }}>
       <span>TOTAL</span>
       <span>Rs.{lastOrder.totalAmount}</span>
     </div>
 
-    <div style={{ borderTop: '1px solid black', margin: '8px 0' }}></div>
+    <div style={{ margin: '8px 0' }}></div>
 
     <div className="text-center mt-2">Thank You For Visiting</div>
     <div className="text-center">Please Visit Again</div>

@@ -63,6 +63,8 @@ function MenuList({ addToCart, resetSearchTrigger }) {
         e.preventDefault();
         const item = filteredItems[selectedIndex];
         if (item) handleAdd(item);
+        setSearchTerm('');
+        selectedIndex(0);
       }
     };
 
