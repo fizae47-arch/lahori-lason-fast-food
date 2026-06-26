@@ -99,7 +99,21 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
   return (
     <div>
       <div className="bg-white p-4 m-4 rounded-lg shadow-md print:hidden">
-        <h2 className="text-xl font-bold mb-4">🛒 Cart</h2>
+        <div className="flex justify-between items-center mb-4">
+  <h2 className="text-xl font-bold">🛒 Cart</h2>
+  {cart.length > 0 && (
+    <button
+      onClick={() => {
+        if (window.confirm('Delete all cart?')) {
+          clearCart();
+        }
+      }}
+      className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
+    >
+      🗑️ Clear All
+    </button>
+  )}
+</div>
 
         {cart.length === 0 ? (
           <p className="text-gray-500">No items added yet</p>
