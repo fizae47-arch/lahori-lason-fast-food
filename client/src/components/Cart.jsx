@@ -103,11 +103,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
   <h2 className="text-xl font-bold">🛒 Cart</h2>
   {cart.length > 0 && (
     <button
-      onClick={() => {
-        if (window.confirm('Delete all cart?')) {
-          clearCart();
-        }
-      }}
+      onClick={clearCart}
       className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600"
     >
       🗑️ Clear All
