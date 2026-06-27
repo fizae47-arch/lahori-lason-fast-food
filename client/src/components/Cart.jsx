@@ -62,7 +62,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
           await saveOrder();
           setLoading(false);
         } else {
-          alert('Cart khali hai!');
+          alert('Cart is empty!');
         }
       }
     };
@@ -83,7 +83,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
 
   const handlePrint = async () => {
     if (cart.length === 0) {
-      alert('Cart khali hai!');
+      alert('Cart is empty!');
       return;
     }
     setLoading(true);
@@ -154,9 +154,9 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
 
       {lastOrder && (
         <div className="receipt-print p-2" style={{ fontFamily: 'monospace', fontSize: '12px' }}>
-          <div className="text-center font-bold" style={{ fontSize: '16px' }}>LAHORI LASON</div>
-          <div className="text-center font-bold" style={{ fontSize: '13px' }}>FAST FOOD</div>
-          <div className="text-center">G.T Road Near Rahwali Cantt</div>
+          <div className="text-center font-bold" style={{ fontSize: '18px' }}>LAHORI LASON FAST FOOD</div>
+          {/* <div className="text-center font-bold" style={{ fontSize: '13px' }}>FAST FOOD</div> */}
+          <div className="text-center" style={{ fontSize: '14px' }}>G.T Road Near Rahwali Cantt</div>
           <div className="text-center">0345-6199593</div>
 
           <div style={{ margin: '8px 0' }}></div>
@@ -182,7 +182,7 @@ function Cart({ cart, increaseQty, decreaseQty, removeItem, clearCart, onOrderSa
 
           <div style={{ margin: '8px 0' }}></div>
 
-          <div className="flex justify-between font-bold" style={{ fontSize: '15px' }}>
+          <div className="flex justify-between font-bold" style={{ fontSize: '18px' }}>
             <span>TOTAL</span>
             <span>Rs.{lastOrder.totalAmount}</span>
           </div>

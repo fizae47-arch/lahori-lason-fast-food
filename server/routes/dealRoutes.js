@@ -5,7 +5,7 @@ const Deal = require('../models/Deal');
 // Saare Deals Lao
 router.get('/', async (req, res) => {
   try {
-    const deals = await Deal.find();
+    const deals = await Deal.find().sort({ name: 1 });
     res.json(deals);
   } catch (error) {
     res.status(500).json({ message: error.message });
