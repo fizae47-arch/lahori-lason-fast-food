@@ -31,7 +31,7 @@ function MenuList({ addToCart, resetSearchTrigger }) {
   const filteredItems =
     searchTerm.trim() !== ''
       ? combinedList.filter((item) =>
-          item.name.toLowerCase().includes(searchTerm.toLowerCase())
+          item.name.toLowerCase().startsWith(searchTerm.toLowerCase())
         )
       : searchedItems.length > 0
         ? searchedItems
@@ -110,7 +110,7 @@ function MenuList({ addToCart, resetSearchTrigger }) {
 
     if (value.trim() !== '') {
       const filtered = combinedList.filter((item) =>
-        item.name.toLowerCase().includes(value.toLowerCase())
+        item.name.toLowerCase().startsWith(value.toLowerCase())
       );
       setSearchedItems(filtered);
     }
