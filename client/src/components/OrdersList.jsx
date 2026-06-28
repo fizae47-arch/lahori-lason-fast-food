@@ -149,11 +149,18 @@ function OrdersList() {
             <div key={order._id} className="bg-white p-4 rounded-lg shadow">
               <div className="flex justify-between items-start">
                 <div>
-                  <p className="font-bold">{order.customerName}</p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(order.createdAt).toLocaleString()}
-                  </p>
-                </div>
+  <p className="font-bold">
+   Invoice #{order.invoiceNumber ?? "N/A"}
+  </p>
+
+  <p className="text-sm font-semibold text-gray-700">
+    {order.customerName}
+  </p>
+
+  <p className="text-sm text-gray-500">
+    {new Date(order.createdAt).toLocaleString()}
+  </p>
+</div>
                 <div className="flex items-center gap-2">
                   <select
                     value={order.status}
