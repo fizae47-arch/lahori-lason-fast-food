@@ -84,11 +84,28 @@ function OrdersList() {
   return (
     <div className="p-4">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold">📋 Orders</h2>
-        <button onClick={fetchOrders} className="bg-gray-700 text-white px-4 py-1 rounded">
-          🔄 Refresh
-        </button>
-      </div>
+  <h2 className="text-2xl font-bold">📋 Orders</h2>
+  <div className="flex gap-2">
+    <button onClick={fetchOrders} className="bg-gray-700 text-white px-4 py-1 rounded">
+      🔄 Refresh
+    </button>
+    <button
+      onClick={async () => {
+        if (window.confirm('Saare orders delete karne hain? Yeh action undo nahi hogi!')) {
+          try {
+            await axios.delete(`${API_URL}/api/orders/deleteall`);
+            fetchOrders();
+          } catch (error) {
+            alert('Error: Orders delete nahi hue!');
+          }
+        }
+      }}
+      className="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700"
+    >
+      🗑️ Delete All
+    </button>
+  </div>
+</div>
 
       {/* Earnings Summary */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">

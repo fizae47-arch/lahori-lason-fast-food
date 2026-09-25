@@ -49,5 +49,13 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
-
+// Saare Orders Delete Karo
+router.delete('/deleteall', async (req, res) => {
+  try {
+    await Order.deleteMany({});
+    res.json({ message: 'All Orders Deleted' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 module.exports = router;

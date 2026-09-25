@@ -8,13 +8,18 @@ function ChangePassword() {
   const [message, setMessage] = useState('');
   const [isError, setIsError] = useState(false);
 
+  // Eye icon state
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage('');
 
     if (newPassword !== confirmPassword) {
       setIsError(true);
-      setMessage('New password is not matched!');
+      setMessage('Naya password match nahi kar raha!');
       return;
     }
 
@@ -30,7 +35,7 @@ function ChangePassword() {
       setConfirmPassword('');
     } catch (err) {
       setIsError(true);
-      setMessage(err.response?.data?.message || 'Error: Password not changed');
+      setMessage(err.response?.data?.message || 'Error: Password change nahi hua');
     }
   };
 
@@ -39,37 +44,68 @@ function ChangePassword() {
       <h2 className="text-2xl font-bold mb-4">🔐 Change Password</h2>
 
       <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow space-y-4">
+
+        {/* Old Password */}
         <div>
           <label className="block text-sm font-semibold mb-1">Old Password</label>
-          <input
-            type="password"
-            value={oldPassword}
-            onChange={(e) => setOldPassword(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showOld ? 'text' : 'password'}
+              value={oldPassword}
+              onChange={(e) => setOldPassword(e.target.value)}
+              className="w-full border p-2 rounded pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowOld(!showOld)}
+              className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+            >
+              {showOld ? '🙈' : '👁️'}
+            </button>
+          </div>
         </div>
 
+        {/* New Password */}
         <div>
           <label className="block text-sm font-semibold mb-1">New Password</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showNew ? 'text' : 'password'}
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full border p-2 rounded pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowNew(!showNew)}
+              className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+            >
+              {showNew ? '🙈' : '👁️'}
+            </button>
+          </div>
         </div>
 
+        {/* Confirm New Password */}
         <div>
           <label className="block text-sm font-semibold mb-1">Confirm New Password</label>
-          <input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="w-full border p-2 rounded"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showConfirm ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full border p-2 rounded pr-10"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirm(!showConfirm)}
+              className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+            >
+              {showConfirm ? '🙈' : '👁️'}
+            </button>
+          </div>
         </div>
 
         {message && (
